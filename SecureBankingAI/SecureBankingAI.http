@@ -1,0 +1,6 @@
+@SecureBankingAI_HostAddress = http://localhost:5110
+
+GET {{SecureBankingAI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

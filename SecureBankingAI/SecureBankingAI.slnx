@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="SecureBankingAI.Api/SecureBankingAI.Api.csproj" />
+  <Project Path="SecureBankingAI.Application/SecureBankingAI.Application.csproj" />
+  <Project Path="SecureBankingAI.Infrastructure/SecureBankingAI.Infrastructure.csproj" />
+  <Project Path="SecureBankingAI.IntegrationTests/SecureBankingAI.IntegrationTests.csproj" />
+  <Project Path="SecureBankingAI.Mcp.Banking/SecureBankingAI.Mcp.Banking.csproj" />
+  <Project Path="SecureBankingAI.UnitTests/SecureBankingAI.UnitTests.csproj" />
+</Solution>
