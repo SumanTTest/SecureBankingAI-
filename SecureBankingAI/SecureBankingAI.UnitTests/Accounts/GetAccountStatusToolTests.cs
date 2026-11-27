@@ -26,7 +26,7 @@ public class GetAccountStatusToolTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<AccountStatusRecord>
             {
-                new("ACC-1001", "Everyday Account", "Active")
+                new("ACC-1001", "Everyday Account", "Active", 5250.75m, "AUD")
             });
 
         var result = await _tool.ExecuteAsync("dev-user");

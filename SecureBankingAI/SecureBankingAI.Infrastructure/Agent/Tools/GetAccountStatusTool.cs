@@ -37,6 +37,7 @@ public sealed class GetAccountStatusTool : IGetAccountStatusTool
             Environment.NewLine,
             accounts.Select(account =>
                 $"Account {account.AccountId}: " +
-                $"{account.AccountType} - {account.Status}."));
+                $"{account.AccountType} - {account.Status}." +
+                $"Balance: {account.Currency} {account.Balance:N2}."));
     }
 }

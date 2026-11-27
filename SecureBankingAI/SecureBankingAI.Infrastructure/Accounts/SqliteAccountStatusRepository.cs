@@ -33,7 +33,9 @@ public sealed class SqliteAccountStatusRepository
             .Select(account => new AccountStatusRecord(
                 account.AccountId,
                 account.AccountType,
-                account.Status))
+                account.Status,
+                account.Balance,
+                account.Currency))
             .ToListAsync(cancellationToken);
     }
 }

@@ -16,4 +16,5 @@ public sealed class BankTransaction
     public string Status { get; set; } = string.Empty;
 
     public BankAccount Account { get; set; } = null!;
+    public DateTime TransactionDateUtc { get; set; }
 }

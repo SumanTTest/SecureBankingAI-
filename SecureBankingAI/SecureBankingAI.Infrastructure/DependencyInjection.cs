@@ -27,6 +27,8 @@ using SecureBankingAI.Infrastructure.Agent;
 using SecureBankingAI.Infrastructure.Agent.Tools;
 using SecureBankingAI.Application.Accounts;
 using SecureBankingAI.Infrastructure.Accounts;
+using SecureBankingAI.Application.Conversations;
+using SecureBankingAI.Infrastructure.Conversations;
 
 namespace SecureBankingAI.Infrastructure;
 public static class DependencyInjection
@@ -166,6 +168,7 @@ services
         services.AddScoped<IAgentService, BankingAgentService>();    
         services.AddScoped<IGetClosurePolicyTool, GetClosurePolicyTool>();
         services.AddScoped<IGetAccountStatusTool, GetAccountStatusTool>();
+        services.AddScoped<IGetRecentTransactionsTool,GetRecentTransactionsTool>();
         // RAG services
         services.AddScoped<IRagService, RagService>();
 
@@ -205,6 +208,7 @@ services.AddScoped<
     IAccountTransactionRepository,
     SqliteAccountTransactionRepository>();
 services.AddScoped<IAccountStatusRepository, SqliteAccountStatusRepository>();
+services.AddScoped<IConversationRepository,  SqliteConversationRepository>();
 
 services.AddScoped<
     IAccountAuthorizationService,

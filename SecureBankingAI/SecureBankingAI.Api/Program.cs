@@ -13,6 +13,7 @@ using System.Text;
 using SecureBankingAI.Application.DocumentApproval;
 using SecureBankingAI.Application.Agent;
 using SecureBankingAI.Infrastructure.Accounts;
+using SecureBankingAI.Application.Conversations;
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]
@@ -413,6 +414,177 @@ var result = await ragService.AskAsync(
 .WithName("AskBankingQuestion")
 .RequireAuthorization();
 
+app.MapPost("/api/conversations", async (
+    CreateConversationRequest request,
+    HttpContext httpContext,
+    IConversationRepository conversationRepository,
+    CancellationToken cancellationToken) =>
+{
+    var userId = httpContext.User.FindFirstValue(
+        ClaimTypes.NameIdentifier);
+
+    if (string.IsNullOrWhiteSpace(userId))
+    {
+        return Results.Forbid();
+    }
+
+    if (request.Title?.Length > 200)
+    {
+        return Results.BadRequest(new
+        {
+            error = "Conversation title cannot exceed 200 characters."
+        });
+    }
+
+    var conversation = await conversationRepository.CreateAsync(
+        userId,
+        request.Title,
+        cancellationToken);
+
+    return Results.Created(
+        $"/api/conversations/{conversation.Id}",
+        conversation);
+})
+.WithName("CreateConversation")
+.RequireAuthorization();
+
+app.MapGet("/api/conversations/{conversationId:guid}", async (
+    Guid conversationId,
+    HttpContext httpContext,
+    IConversationRepository conversationRepository,
+    int? maxMessages,
+    CancellationToken cancellationToken) =>
+{
+    var userId = httpContext.User.FindFirstValue(
+        ClaimTypes.NameIdentifier);
+
+    if (string.IsNullOrWhiteSpace(userId))
+    {
+        return Results.Forbid();
+    }
+
+    var messageLimit = maxMessages ?? 20;
+
+    if (messageLimit is < 1 or > 100)
+    {
+        return Results.BadRequest(new
+        {
+            error = "maxMessages must be between 1 and 100."
+        });
+    }
+
+    var history = await conversationRepository.GetHistoryAsync(
+        userId,
+        conversationId,
+        messageLimit,
+        cancellationToken);
+
+    if (history is null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(history);
+})
+.WithName("GetConversationHistory")
+.RequireAuthorization();
+
+app.MapPost("/api/conversations/{conversationId:guid}/messages", async (
+    Guid conversationId,
+    AgentRequest request,
+    HttpContext httpContext,
+    IConversationRepository conversationRepository,
+    IAgentService agentService,
+    CancellationToken cancellationToken) =>
+{
+    var userId = httpContext.User.FindFirstValue(
+        ClaimTypes.NameIdentifier);
+
+    if (string.IsNullOrWhiteSpace(userId))
+    {
+        return Results.Forbid();
+    }
+
+    if (string.IsNullOrWhiteSpace(request.Message))
+    {
+        return Results.BadRequest(new
+        {
+            error = "Message cannot be empty."
+        });
+    }
+
+    if (request.Message.Length > 4000)
+    {
+        return Results.BadRequest(new
+        {
+            error = "Message cannot exceed 4000 characters."
+        });
+    }
+
+    // Load previous messages belonging to this user.
+    var history = await conversationRepository.GetHistoryAsync(
+        userId,
+        conversationId,
+        20,
+        cancellationToken);
+
+    if (history is null)
+    {
+        return Results.NotFound();
+    }
+
+    // Persist the current user message.
+    var userMessageSaved =
+        await conversationRepository.AddMessageAsync(
+            userId,
+            conversationId,
+            "user",
+            request.Message,
+            cancellationToken);
+
+    if (!userMessageSaved)
+    {
+        return Results.NotFound();
+    }
+
+    // Build context using trusted database history.
+    var agentRequest = new AgentRequest(
+        request.Message,
+        history.Messages
+            .Select(message => new AgentConversationMessage(
+                message.Role,
+                message.Content))
+            .ToList());
+
+    // Process through the existing banking agent.
+    var response = await agentService.ProcessAsync(
+        agentRequest,
+        userId,
+        cancellationToken);
+
+    // Persist the assistant response.
+    var assistantMessageSaved =
+        await conversationRepository.AddMessageAsync(
+            userId,
+            conversationId,
+            "assistant",
+            response.Message,
+            cancellationToken);
+
+    if (!assistantMessageSaved)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(new
+    {
+        conversationId,
+        response
+    });
+})
+.WithName("SendConversationMessage")
+.RequireAuthorization();
+
 app.MapPost("/api/agent", async (
     AgentRequest request,
     HttpContext httpContext,
@@ -464,3 +636,4 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 }
 public partial class Program { }
 public sealed record SetDocumentTrustRequest(bool IsTrusted);
+public sealed record CreateConversationRequest(string? Title);

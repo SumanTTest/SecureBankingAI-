@@ -68,6 +68,18 @@ public sealed class SqliteAccountStatusRepositoryTests
         Assert.DoesNotContain(
             results,
             account => account.AccountId == "ACC-2001");
+        var customerBResults =
+    await repository.GetAccountsForUserAsync("customer-b");
+
+Assert.Single(customerBResults);
+
+Assert.Equal(
+    "ACC-2001",
+    customerBResults[0].AccountId);
+
+Assert.DoesNotContain(
+    customerBResults,
+    account => account.AccountId == "ACC-1001");
     }
 
     [Fact]

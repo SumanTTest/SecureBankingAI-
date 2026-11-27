@@ -45,7 +45,8 @@ public static class DemoBankingDataSeeder
                 Description = "Supermarket",
                 Amount = -85.50m,
                 Currency = "AUD",
-                Status = "Completed"
+                Status = "Completed",
+                TransactionDateUtc = DateTime.UtcNow
             }, cancellationToken);
 
             await EnsureTransactionAsync(dbContext, new BankTransaction
@@ -55,7 +56,8 @@ public static class DemoBankingDataSeeder
                 Description = "Salary",
                 Amount = 3500.00m,
                 Currency = "AUD",
-                Status = "Completed"
+                Status = "Completed",
+                TransactionDateUtc = DateTime.UtcNow
             }, cancellationToken);
 
             await EnsureTransactionAsync(dbContext, new BankTransaction
@@ -65,7 +67,8 @@ public static class DemoBankingDataSeeder
                 Description = "Electricity",
                 Amount = -120.00m,
                 Currency = "AUD",
-                Status = "Pending"
+                Status = "Pending",
+                TransactionDateUtc = DateTime.UtcNow
             }, cancellationToken);
         }
 
@@ -78,7 +81,8 @@ public static class DemoBankingDataSeeder
                 Description = "Online transfer",
                 Amount = -250.00m,
                 Currency = "AUD",
-                Status = "Completed"
+                Status = "Completed",
+                TransactionDateUtc = DateTime.UtcNow
             }, cancellationToken);
         }
 

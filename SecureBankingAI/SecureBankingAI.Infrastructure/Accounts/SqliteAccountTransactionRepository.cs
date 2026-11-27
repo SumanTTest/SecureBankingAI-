@@ -38,7 +38,7 @@ public sealed class SqliteAccountTransactionRepository
         return await _dbContext.BankTransactions
             .AsNoTracking()
             .Where(transaction => transaction.AccountId == accountId)
-            .OrderByDescending(transaction => transaction.TransactionId)
+            .OrderByDescending(transaction => transaction.TransactionDateUtc)
             .Take(maxResults)
             .Select(transaction => new AccountTransaction(
                 transaction.TransactionId,

@@ -4,7 +4,9 @@ namespace SecureBankingAI.Application.Accounts;
 public sealed record AccountStatusRecord(
     string AccountId,
     string AccountType,
-    string Status);
+    string Status,
+    decimal Balance,
+    string Currency);
 
 public interface IAccountStatusRepository
 {
